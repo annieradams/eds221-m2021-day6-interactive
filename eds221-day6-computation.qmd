@@ -1,0 +1,11 @@
+---
+title: "day 6 computation"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+```
