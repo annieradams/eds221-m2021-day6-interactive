@@ -9,3 +9,50 @@ library(tidyverse)
 library(here)
 library(janitor)
 ```
+
+```{r}
+wb_indicators <- read_csv(here("data","wb_indicators.csv"), na= c("..",""))
+```
+
+```{r}
+wb_indicators_long <- wb_indicators %>% pivot_longer(cols = `2001 [YR2001]`:`2020 [YR2020]`,
+                                                     names_to = "Year",
+                                                     values_to = "Indicator Value")
+```
+
+```{r}
+wb_indicators_clean <- wb_indicators_long %>% 
+    separate(col = Year, into = c("year","year_chr"), sep = " ") %>% 
+    dplyr::select(-year_chr, -`Country Code`, -`Series Code`)
+```
+
+```{r}
+unique(wb_indicators_clean$`Series Name`)
+```
+
+```{r}
+wb_indicators_tidy <- wb_indicators_clean %>% 
+  tidyr::drop_na(`Series Name`) %>% 
+  tidyr::pivot_wider(names_from = `Series Name`, 
+                      values_from = `Indicator Value`)%>%
+  dplyr::rename(country= "Country Name",access_fuels_pp = "Access to clean fuels and technologies for cooking (% of population)",access_electricity_pp ="Access to electricity (% of population)", CO2_emmisions_kt = "CO2 emissions (kt)", fossil_fuel_pp ="Fossil fuel energy consumption (% of total)", water_stress = "Level of water stress: freshwater withdrawal as a proportion of available freshwater resources"   %>% 
+                  dplyr:: mutate(year = as.numeric(year))
+  )
+```
+
+```{# {r} # sketchy way to name because its based on the order, use rename instead}
+# names(wb_indicators_tidy) <- c("country",
+#                                "year",
+#                                "access_clean_fuels_pp",
+#                                "access_electricity_pp",
+#                                "co2_emmissions_kt",
+#                                "fossil_fuels_cons_pt",
+#                                "water_stress")
+```
+
+```{r}
+ggplot(data = wb_indicators_tidy, aes(x = year , y = CO2_emmisions_kt))+
+  geom_line(aes(color= country)) + 
+  theme(legend.position = "none")
+  
+```
